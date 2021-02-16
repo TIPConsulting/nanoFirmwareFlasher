@@ -48,6 +48,14 @@ namespace nanoFramework.Tools.FirmwareFlasher
         private readonly int _flashFrequency = 0;
 
         /// <summary>
+        /// The flash partition size for the esptool
+        /// </summary>
+        /// <remarks>
+        /// If populated, this will override the hardware default flashsize.
+        /// </remarks>
+        private readonly string _requestedFlashPartitionSize = null;
+
+        /// <summary>
         /// The size of the flash in bytes; 4 MB = 0x40000 bytes
         /// </summary>
         private int _flashSize = -1;
@@ -124,12 +132,12 @@ namespace nanoFramework.Tools.FirmwareFlasher
             /// <param name="flashDeviceModelId">Flash device type ID</param>
             /// <param name="flashSize">The size of the flash in bytes</param>
             internal DeviceInfo(
-                Version toolVersion, 
-                string chipName, 
-                string features, 
-                PhysicalAddress macAddress, 
-                byte flashManufacturerId, 
-                short flashDeviceModelId, 
+                Version toolVersion,
+                string chipName,
+                string features,
+                PhysicalAddress macAddress,
+                byte flashManufacturerId,
+                short flashDeviceModelId,
                 int flashSize)
             {
                 ToolVersion = toolVersion;
@@ -149,11 +157,13 @@ namespace nanoFramework.Tools.FirmwareFlasher
         /// <param name="baudRate">The baud rate for the serial port.</param>
         /// <param name="flashMode">The flash mode for the esptool</param>
         /// <param name="flashFrequency">The flash frequency for the esptool</param>
+        /// <param name="requestedFlashPartitionSize">The flash partition size for the esptool</param>
         internal EspTool(
-            string serialPort, 
+            string serialPort,
             int baudRate,
-            string flashMode, 
-            int flashFrequency)
+            string flashMode,
+            int flashFrequency,
+            string requestedFlashPartitionSize)
         {
             // open/close the port to see if it is available
             using (SerialPort test = new SerialPort(serialPort, baudRate))
@@ -170,7 +180,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                 }
             }
 
-            if(Verbosity >= VerbosityLevel.Detailed)
+            if (Verbosity >= VerbosityLevel.Detailed)
             {
                 Console.WriteLine($"Using {serialPort} @ {baudRate} baud to connect to ESP32.");
             }
@@ -180,6 +190,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
             _baudRate = baudRate;
             _flashMode = flashMode;
             _flashFrequency = flashFrequency;
+            _requestedFlashPartitionSize = requestedFlashPartitionSize;
         }
 
         /// <summary>
@@ -224,9 +235,10 @@ namespace nanoFramework.Tools.FirmwareFlasher
             }
 
             // that gives us the flash manufacturer, flash device type ID and flash size
+            // requested flash size will be preferred, actual device size will be used as a fallback
             string manufacturer = match.Groups["manufacturer"].ToString().Trim();
             string device = match.Groups["device"].ToString().Trim();
-            string size = match.Groups["size"].ToString().Trim();
+            string size = _requestedFlashPartitionSize ?? match.Groups["size"].ToString().Trim();
 
             // collect and return all information
             // convert the flash size into bytes
@@ -395,10 +407,10 @@ namespace nanoFramework.Tools.FirmwareFlasher
         /// <param name="messages">StandardOutput and StandardError messages that the esptool prints out</param>
         /// <returns>true if the esptool exit code was 0; false otherwise</returns>
         private bool RunEspTool(
-            string commandWithArguments, 
-            bool noStub, 
-            bool hardResetAfterCommand, 
-            char? progressTestChar, 
+            string commandWithArguments,
+            bool noStub,
+            bool hardResetAfterCommand,
+            char? progressTestChar,
             out string messages)
         {
             // create the process start info
@@ -506,7 +518,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
         /// <param name="progressTestChar">search char for the progress message delimiter (backspace or linefeed)</param>
         /// <returns></returns>
         private string FindProgress(
-            StringBuilder messageBuilder, 
+            StringBuilder messageBuilder,
             char progressTestChar)
         {
             // search for the given char (backspace or linefeed)
@@ -523,7 +535,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                     return progress.Substring(delimiter + 1).PadRight(110);
                 }
             }
- 
+
             // no progress message found
             return null;
         }

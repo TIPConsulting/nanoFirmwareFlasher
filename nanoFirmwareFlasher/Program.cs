@@ -44,7 +44,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
             UriBuilder uri = new UriBuilder(codeBase);
             var fullPath = Uri.UnescapeDataString(uri.Path);
             ExecutingPath = Path.GetDirectoryName(fullPath);
-            
+
             // check for empty argument collection
             if (!args.Any())
             {
@@ -53,7 +53,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                 // because of short-comings in CommandLine parsing 
                 // need to customize the output to provide a consistent output
                 var parser = new Parser(config => config.HelpWriter = null);
-                var result = parser.ParseArguments<Options>(new string[] { "", ""});
+                var result = parser.ParseArguments<Options>(new string[] { "", "" });
 
                 var helpText = new HelpText(
                     new HeadingInfo(headerInfo),
@@ -180,7 +180,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
             if (string.IsNullOrEmpty(o.Platform))
             {
                 // JTAG related
-                if ( 
+                if (
                     o.ListJtagDevices ||
                     !string.IsNullOrEmpty(o.JtagDeviceId) ||
                     o.HexFile.Any() ||
@@ -189,7 +189,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                     o.Platform = "stm32";
                 }
                 // DFU related
-                else if ( 
+                else if (
                     o.ListDevicesInDfuMode ||
                     !string.IsNullOrEmpty(o.DfuDeviceId) ||
                     !string.IsNullOrEmpty(o.DfuFile))
@@ -220,7 +220,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                     _exitCode = ExitCodes.E6001;
                     return;
                 }
-                
+
                 EspTool espTool;
 
                 try
@@ -229,9 +229,10 @@ namespace nanoFramework.Tools.FirmwareFlasher
                         o.SerialPort,
                         o.BaudRate,
                         o.Esp32FlashMode,
-                        o.Esp32FlashFrequency);
+                        o.Esp32FlashFrequency,
+                        o.Esp32FlashPartitionSize);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     _exitCode = ExitCodes.E4005;
                     return;
@@ -526,7 +527,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                 {
                     // this has to be a JTAG connected device
 
-#region STM32 JTAG options
+                    #region STM32 JTAG options
 
                     try
                     {
@@ -575,7 +576,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                         _exitCode = ExitCodes.E5002;
                     }
 
-#endregion
+                    #endregion
                 }
                 else if (!string.IsNullOrEmpty(o.TargetName))
                 {
@@ -664,10 +665,10 @@ namespace nanoFramework.Tools.FirmwareFlasher
                 }
             }
 
-#endregion
+            #endregion
 
 
-#region TI CC13x2 platform options
+            #region TI CC13x2 platform options
 
             if (o.Platform == "cc13x2")
             {
@@ -750,7 +751,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                     }
                 }
 
-                if(o.TIInstallXdsDrivers)
+                if (o.TIInstallXdsDrivers)
                 {
 
                     _exitCode = CC13x26x2Operations.InstallXds110Drivers(verbosityLevel);
@@ -763,7 +764,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
                 }
             }
 
-#endregion
+            #endregion
 
         }
 

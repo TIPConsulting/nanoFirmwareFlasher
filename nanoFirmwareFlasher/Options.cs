@@ -14,7 +14,7 @@ namespace nanoFramework.Tools.FirmwareFlasher
         #region STM32 DFU options
 
         [Option(
-            "dfufile", 
+            "dfufile",
             Required = false,
             Default = null,
             HelpText = "DFU file to be flashed into the device.")]
@@ -97,6 +97,13 @@ namespace nanoFramework.Tools.FirmwareFlasher
             Default = 40,
             HelpText = "Flash frequency to use [MHz].")]
         public int Esp32FlashFrequency { get; set; }
+
+        [Option(
+            "flashsize",
+            Required = false,
+            Default = null,
+            HelpText = "Flash partition size to use [mb].")]
+        public string Esp32FlashPartitionSize { get; set; }
 
         #endregion
 
